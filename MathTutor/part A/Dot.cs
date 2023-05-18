@@ -8,15 +8,9 @@ namespace MathTutor.part_A
 {
     internal class Dot
     {
-        public double X { get; set; }
+        public required double X { get; init; }
 
-        public double Y { get; set; }
-
-        public Dot(double x, double y) 
-        {
-            X = x;
-            Y = y;
-        }
+        public required double Y { get; init; }
 
         public override string ToString()
         {

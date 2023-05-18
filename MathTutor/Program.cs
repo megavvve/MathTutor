@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MathTutor.part_A;
+using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace MathTutor 
 {
