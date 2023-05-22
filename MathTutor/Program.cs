@@ -6,7 +6,9 @@ namespace MathTutor
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            FormulaTrainer trainer = new FormulaTrainer();
+            trainer.Training();
+        
         }
     }
 }
