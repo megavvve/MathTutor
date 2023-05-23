@@ -8,13 +8,13 @@ namespace MathTutor.part_A
 {
     internal class Dot
     {
-        public required double X { get; init; }
+        public required double X { get; set; }
 
-        public required double Y { get; init; }
+        public required double Y { get; set; }
 
         public override string ToString()
         {
-            return $"({X}, {Y})";
+            return $"({X},{Y})";
         }
     }
 }
