@@ -6,7 +6,9 @@ namespace MathTutor
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var g = new GeneratingControlWork();
+            //g.PrintLists(g.Generating(5, 5));
+            g.GenerateFiles(g.Generating(5, 5));
         }
     }
 }
