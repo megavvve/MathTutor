@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathTutor.part_A;
+using System;
 
 namespace MathTutor 
 {
@@ -16,7 +17,7 @@ namespace MathTutor
                 {
                     case "A":
                         {
-                            //TODO
+                            var simulator = new Simulator();
                             break;
                         }
                     case "B":
@@ -25,6 +26,7 @@ namespace MathTutor
                             int countControlWork = int.Parse(Console.ReadLine());
                             int countTasks = int.Parse(Console.ReadLine());
                             controlWork.GenerateFiles(controlWork.Generating(countTasks, countControlWork));
+                            Console.WriteLine("Проверьте папку bin, там сгенерировались варианты и подсказки к заданиям!");
                             break;
                         }
                     case "C":
