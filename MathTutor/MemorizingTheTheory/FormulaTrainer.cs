@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,38 +10,56 @@ namespace MathTutor
 {
     public class FormulaTrainer
     {
-        public Dictionary<string, List<Formula>> formulas = new Dictionary<string, List<Formula>>();
-        public Dictionary<string, List<Formula>> wrongAnswers = new Dictionary<string, List<Formula>>();
-        public Dictionary<string, List<Formula>> correctAnswers = new Dictionary<string, List<Formula>>();
+
+        private Dictionary<string, List<Formula>> formulas = new Dictionary<string, List<Formula>>();
+        private Dictionary<string, List<Formula>> wrongAnswers = new Dictionary<string, List<Formula>>();
+        private Dictionary<string, List<Formula>> correctAnswers = new Dictionary<string, List<Formula>>();
         public FormulaTrainer() { }
         public void Training()
         {
             LoadFormulas(@"./input-files/formulas.txt");
 
             StartForTrainig();
-            List<string> topics = SelectTopics();
-
-            Dictionary<string, Formula> formulasFromTopics = FormulasFromTopics(topics);
-            if (formulasFromTopics.Count == 0)
+            while (true)
             {
-                Console.WriteLine("Проверь правильность введенный данных");
+                List<string> topics = SelectTopics();
+
+                Dictionary<string, List<Formula>> formulasFromTopics = FormulasFromTopics(topics);
+                if (formulasFromTopics.Count == 0)
+                {
+                    Console.WriteLine("Проверь правильность введенный данных");
+                }
+
+
+                MainTrainFormula(formulasFromTopics);
+
+                AddWrongAnswerInDB(@"input-files/data_base_for_statistic.txt");
+                WorkOnMistakes();//работа над ошибками
+                Console.WriteLine("Напишите одну тему, которая вас интересует, чтобы вывести по ней статистику");
+                PrintThemes();//вывод тем
+                string userInputForStat = Console.ReadLine().Trim().ToLower();
+                Console.WriteLine("Введите какое количество последних тренировок, которое вас интересует для вывода статистика по теме");
+                int countForStat = Convert.ToInt32(Console.ReadLine());
+                PrintWrongAnswerStatistics(userInputForStat, countForStat, @"input-files/data_base_for_statistic.txt");
+                Thread.Sleep(2000);
+                Console.WriteLine("Напишите Y,если хотите продолжить тренировку");
+                Console.WriteLine("Если хотите завершить, нажмите любую кнопку кроме Y");
+                string userInput = Console.ReadLine().Trim().ToUpper();
+                if (userInput == "Y")
+                {
+                    Console.Clear();
+                    Console.WriteLine();
+                    Console.WriteLine("Напишите темы через запятую, которые вас интересуют");
+                    PrintThemes();
+                }
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("тренировка завершена!");
+                    break;
+                }
+
             }
-
-
-            MainTrainFormula(formulasFromTopics);
-            WorkOnMistakes();
-            //PrintWrongAnswerStatistics("algebra", 5);
-            Console.WriteLine("Напишите одну тему, которая вас интересует, чтобы вывести по ней статистику");
-            PrintThemes();
-            string userInputForStat = Console.ReadLine().Trim().ToLower();
-            Console.WriteLine("Введите какое количество последних тренировок, которое вас интересует для вывода статистика по теме");
-            int countForStat = Convert.ToInt32(Console.ReadLine());
-            PrintWrongAnswerStatistics(userInputForStat, countForStat);
-
-
-
-
-
         }
         private void StartForTrainig()
         {
@@ -82,7 +101,7 @@ namespace MathTutor
                 Console.Clear();
                 Console.WriteLine();
                 Console.WriteLine("Работа над ошибками закончена!");
-                //Console.WriteLine("Тренировка окончена, ошибок нет!");
+
             }
         }
         private void PrintFormulaForWorkOnMistakes(string theme, Formula formula)
@@ -157,21 +176,25 @@ namespace MathTutor
                 Console.WriteLine("Введите Y или N:");
             }
         }
-        private void MainTrainFormula(Dictionary<string, Formula> formulasFromTopics)
+        private void MainTrainFormula(Dictionary<string, List<Formula>> formulasFromTopics)
         {
 
             foreach (var formula in formulasFromTopics)
             {
-                PrintFormulaForTraining(formula.Key, formula.Value);
+                foreach (var item in formula.Value)
+                {
+                    PrintFormulaForTraining(formula.Key, item);
+                }
+
 
             }
 
         }
 
-        private Dictionary<string, Formula> FormulasFromTopics(List<string> topics)
+        private Dictionary<string, List<Formula>> FormulasFromTopics(List<string> topics)
         {
 
-            Dictionary<string, Formula> formulasFromTopics = new Dictionary<string, Formula>();
+            Dictionary<string, List<Formula>> formulasFromTopics = new Dictionary<string, List<Formula>>();
             foreach (var item in formulas)
             {
                 foreach (var item2 in topics)
@@ -180,8 +203,15 @@ namespace MathTutor
                     {
                         foreach (var item3 in item.Value)
                         {
+                            if (formulasFromTopics.ContainsKey(item2))
+                            {
+                                formulasFromTopics[item2].Add(item3);
+                            }
+                            else
+                            {
+                                formulasFromTopics.Add(item2, new List<Formula> { { item3 } });
+                            }
 
-                            formulasFromTopics.Add(item2, item3);
                         }
 
                     }
@@ -238,7 +268,7 @@ namespace MathTutor
 
             using (StreamReader sr = File.OpenText(path))
             {
-                string line = sr.ReadLine();
+                string line = sr.ReadLine().Trim();
 
                 while (line != null)
                 {
@@ -247,7 +277,6 @@ namespace MathTutor
                     if (line != null)
                     {
                         string[] formulaWithTheme = Regex.Split(line, ",");
-
                         string theme = formulaWithTheme[0].ToLower();
                         Formula formula = new Formula(formulaWithTheme[1], formulaWithTheme[2]);
 
@@ -259,9 +288,6 @@ namespace MathTutor
                         {
                             formulas.Add(theme, new List<Formula> { formula });
                         }
-
-
-
                     }
                     line = sr.ReadLine();
 
@@ -269,7 +295,30 @@ namespace MathTutor
             }
 
         }
-        
+        private void AddWrongAnswerInDB(string path)
+        {
+            int lastTrain = 0;
+            if (new FileInfo(path).Length == 0)
+            {
+                lastTrain = 0;
+            }
+            else
+            {
+                lastTrain = int.Parse(File.ReadAllLines(path).Last().Split(',')[0]);
+            }
+
+            using (var fs = new FileStream(path, FileMode.Append))
+            using (var sw = new StreamWriter(fs))
+            {
+                foreach (var item in wrongAnswers.Keys)
+                {
+                    string str = $"{lastTrain + 1},{item},{wrongAnswers[item].Count}";
+                    sw.WriteLine(str);
+                }
+            }
+
+
+        }
         private void PrintThemes()
         {
             int c = 1;
@@ -282,25 +331,61 @@ namespace MathTutor
             }
             Console.WriteLine();
         }
-        public void PrintWrongAnswerStatistics(string topic, int numTrainings)
+        public void PrintWrongAnswerStatistics(string topic, int numTrainings, string path)
         {
-            if (wrongAnswers.ContainsKey(topic))
+
+            List<string> data_base = File.ReadAllLines(path).ToList();
+            List<string> take_last_from_DB = data_base.Where(x => x.Split(',')[1] == topic).TakeLast(numTrainings).ToList();
+            Dictionary<string, Dictionary<string, int>> dict_from_DB = new Dictionary<string, Dictionary<string, int>>();
+            foreach (var string_from_DB in take_last_from_DB)
             {
-                int totalTrainings = Math.Min(numTrainings, wrongAnswers[topic].Count);
-                Console.WriteLine($"Статистика неправильных ответов по теме '{topic}' (основанная на {totalTrainings} тренировках):");
-                Console.WriteLine($"Формула\t\tКоличество неправильных ответов\tПроцент");
-                foreach (var formulaEntry in formulas[topic])
+                if (string_from_DB != null)
                 {
-                    string formulaName = formulaEntry.name;
-                    int wrongCount = wrongAnswers.ContainsKey(formulaName) ? wrongAnswers[formulaName].Count : 0;
-                    double percentage = (double)wrongCount / totalTrainings * 100;
-                    Console.WriteLine($"{formulaName}\t\t{wrongCount}\t\t{percentage}%");
+                    string numTrain = string_from_DB.Split(',')[0];
+                    string theme = string_from_DB.Split(',')[1];
+                    int countWrongAnswers = int.Parse(string_from_DB.Split(',')[2]);
+                    if (dict_from_DB.ContainsKey(numTrain))
+                    {
+                        if (dict_from_DB[numTrain].ContainsKey(theme))
+                        {
+                            dict_from_DB[numTrain].Remove(theme);
+                            dict_from_DB[numTrain].Add(theme, countWrongAnswers);
+                        }
+                        else
+                        {
+                            dict_from_DB[numTrain].Add(theme, countWrongAnswers);
+                        }
+                    }
+                    else
+                    {
+
+                        dict_from_DB.Add(numTrain, new Dictionary<string, int>() { { theme, countWrongAnswers } });
+
+                    }
+
                 }
+
             }
-            else
+            Console.WriteLine($"Статистика неправильных ответов по теме '{topic}' (основанная на {numTrainings} тренировках):");
+            Console.WriteLine();
+            Console.WriteLine($"Номер тренировки\t\tКоличество неправильных ответов");
+            foreach (var numTrain in dict_from_DB.Keys)
             {
-                Console.WriteLine($"Количество неправильных ответов по теме: '{topic}'.");
+                var themeWithCount = dict_from_DB[numTrain];
+                foreach (var themeInDict in themeWithCount.Keys)
+                {
+                    if (themeInDict == topic)
+                    {
+
+                        int wrongCount = themeWithCount[themeInDict];
+                        Console.WriteLine($"Тренировка {numTrain}\t\t{wrongCount}");
+                    }
+                }
+
             }
+            Console.WriteLine();
+            Console.WriteLine();
+
         }
 
     }

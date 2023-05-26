@@ -8,6 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="input-files\data_base_for_statistic.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
     <None Update="input-files\formulas.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
