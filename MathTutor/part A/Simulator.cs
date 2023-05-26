@@ -52,7 +52,7 @@ namespace MathTutor.part_A
 
         }
 
-        public void R(Rectangle rect, int a)
+        public void TurnRectangle(Rectangle rect, int a)
         {
             foreach (var vertices in rect.GetVertices())
             {
