@@ -91,7 +91,7 @@ namespace MathTutor
                 writer.WriteLine("Подсказки");
                 for (int i = 0; i < tasks.Count; i++)
                 {
-                    writer.WriteLine(i + ". " + tasks[i].answer);
+                    writer.WriteLine(i + ". " + tasks[i].hint);
                 }
             }
         }

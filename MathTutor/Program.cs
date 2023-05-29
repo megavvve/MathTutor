@@ -23,7 +23,9 @@ namespace MathTutor
                     case "B":
                         {
                             GeneratingControlWork controlWork = new GeneratingControlWork();
+                            Console.WriteLine("Введите количество вариантов");
                             int countControlWork = int.Parse(Console.ReadLine());
+                            Console.WriteLine("Введите количество заданий в варианте");
                             int countTasks = int.Parse(Console.ReadLine());
                             controlWork.GenerateFiles(controlWork.Generating(countTasks, countControlWork));
                             Console.WriteLine("Проверьте папку bin, там сгенерировались варианты и подсказки к заданиям!");
