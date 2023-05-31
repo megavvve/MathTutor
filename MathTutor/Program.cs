@@ -1,7 +1,8 @@
-﻿using MathTutor.part_A;
+﻿using MathTutor.KnowlendgeCheck;
+using MathTutor.part_A;
 using System;
 
-namespace MathTutor 
+namespace MathTutor
 {
     internal class Program
     {

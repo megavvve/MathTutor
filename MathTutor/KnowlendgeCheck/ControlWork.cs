@@ -5,17 +5,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace MathTutor
+namespace MathTutor.KnowlendgeCheck
 {
     public class ControlWork
     {
         public List<string> Questions { get; }
         public List<string> Hints { get; }
-        public List<double> Answers {  get; }
+        public List<double> Answers { get; }
 
 
-        public ControlWork() 
-        { 
+        public ControlWork()
+        {
             Questions = new List<string>();
             Hints = new List<string>();
             Answers = new List<double>();

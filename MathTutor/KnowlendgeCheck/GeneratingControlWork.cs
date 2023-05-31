@@ -6,18 +6,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MathTutor
+namespace MathTutor.KnowlendgeCheck
 {
     public class GeneratingControlWork : ControlWork
     {
 
 
-        public GeneratingControlWork() 
+        public GeneratingControlWork()
         {
             ReadFiles();
         }
 
-        
+
 
         /// <summary>
         /// Генерация  вариантов
@@ -34,7 +34,7 @@ namespace MathTutor
 
             List<(string question, string hint, double answer)> controlWorks = new List<(string question, string hint, double answer)>();
             Random rnd = new Random();
-            while(countControlWork != 0)
+            while (countControlWork != 0)
             {
                 controlWorks.Add(($"                                                                                            Вариант номер {countControlWork}", string.Empty, 0));
                 for (int i = 0; i < countTasks; i++)
@@ -48,7 +48,7 @@ namespace MathTutor
                 }
                 countControlWork--;
             }
-            
+
             return controlWorks;
         }
 
@@ -64,7 +64,7 @@ namespace MathTutor
                 Console.WriteLine(item.question);
                 Console.WriteLine();
             }
-            
+
         }
 
         /// <summary>
@@ -73,8 +73,8 @@ namespace MathTutor
         /// <param name="lists"></param>
         public void GenerateFiles(List<(string question, string hint, double answer)> tasks)
         {
-            string fileName = "./ControlWork.txt"; 
-            string file = "./Hints.txt"; 
+            string fileName = "./ControlWork.txt";
+            string file = "./Hints.txt";
             using (StreamWriter writer = new StreamWriter(fileName))
             {
                 foreach (var task in tasks)
@@ -84,7 +84,7 @@ namespace MathTutor
             }
             using (StreamWriter writer = new StreamWriter(file))
             {
-                
+
                 writer.WriteLine();
                 writer.WriteLine();
                 writer.WriteLine();
