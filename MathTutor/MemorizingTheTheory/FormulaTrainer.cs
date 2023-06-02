@@ -14,6 +14,8 @@ namespace MathTutor
         private Dictionary<string, List<Formula>> formulas = new Dictionary<string, List<Formula>>();
         private Dictionary<string, List<Formula>> wrongAnswers = new Dictionary<string, List<Formula>>();
         private Dictionary<string, List<Formula>> correctAnswers = new Dictionary<string, List<Formula>>();
+
+        
         public FormulaTrainer() { }
         public void Training()
         {
@@ -63,12 +65,12 @@ namespace MathTutor
         }
         private void StartForTrainig()
         {
-            Console.WriteLine("Привет! Это тренажер для заучивания формул");
+            Console.WriteLine("Привет! Это тренажер для заучивания формул/теорем");
             Console.WriteLine("Напишите темы через запятую, которые вас интересуют");
             PrintThemes();
 
         }
-        private void WorkOnMistakes()
+        public void WorkOnMistakes()
         {
             Console.WriteLine();
             if (wrongAnswers.Count() != 0)
@@ -104,7 +106,10 @@ namespace MathTutor
 
             }
         }
-        private void PrintFormulaForWorkOnMistakes(string theme, Formula formula)
+
+        
+
+        public void PrintFormulaForWorkOnMistakes(string theme, Formula formula)
         {
             Console.WriteLine("------------------------------");
             Console.WriteLine("тема: " + theme);
@@ -138,7 +143,10 @@ namespace MathTutor
             }
 
         }
-        private void PrintFormulaForTraining(string theme, Formula formula)
+
+        
+
+        public void PrintFormulaForTraining(string theme, Formula formula)
         {
             Console.WriteLine("------------------------------");
             Console.WriteLine("тема: " + theme);
@@ -176,7 +184,7 @@ namespace MathTutor
                 Console.WriteLine("Введите Y или N:");
             }
         }
-        private void MainTrainFormula(Dictionary<string, List<Formula>> formulasFromTopics)
+        public void MainTrainFormula(Dictionary<string, List<Formula>> formulasFromTopics)
         {
 
             foreach (var formula in formulasFromTopics)
@@ -191,7 +199,7 @@ namespace MathTutor
 
         }
 
-        private Dictionary<string, List<Formula>> FormulasFromTopics(List<string> topics)
+        public Dictionary<string, List<Formula>> FormulasFromTopics(List<string> topics)
         {
 
             Dictionary<string, List<Formula>> formulasFromTopics = new Dictionary<string, List<Formula>>();
@@ -220,7 +228,7 @@ namespace MathTutor
             }
             return formulasFromTopics;
         }
-        private List<string> SelectTopics()
+        public List<string> SelectTopics()
         {
             List<string> topics = new List<string>();
             string userInput = Console.ReadLine().Trim().ToLower();
@@ -238,7 +246,7 @@ namespace MathTutor
             return topics;
 
         }
-        private void UpdateIncorrectAnswerStats(string theme, Formula formula)
+        public void UpdateIncorrectAnswerStats(string theme, Formula formula)
         {
 
             if (wrongAnswers.ContainsKey(theme))
@@ -250,7 +258,7 @@ namespace MathTutor
                 wrongAnswers.Add(theme, new List<Formula> { formula });
             }
         }
-        private void UpdateCorrectAnswerStats(string theme, Formula formula)
+        public void UpdateCorrectAnswerStats(string theme, Formula formula)
         {
 
             if (correctAnswers.ContainsKey(theme))
@@ -263,7 +271,7 @@ namespace MathTutor
                 correctAnswers.Add(theme, new List<Formula> { formula });
             }
         }
-        private void LoadFormulas(string path)
+        public void LoadFormulas(string path)
         {
 
             using (StreamReader sr = File.OpenText(path))
@@ -295,7 +303,7 @@ namespace MathTutor
             }
 
         }
-        private void AddWrongAnswerInDB(string path)
+        public void AddWrongAnswerInDB(string path)
         {
             int lastTrain = 0;
             if (new FileInfo(path).Length == 0)
@@ -319,7 +327,7 @@ namespace MathTutor
 
 
         }
-        private void PrintThemes()
+        public void PrintThemes()
         {
             int c = 1;
             Console.WriteLine();
@@ -387,6 +395,11 @@ namespace MathTutor
             Console.WriteLine();
 
         }
+
+
+        public string TheShortestTheory(Dictionary<string, List<Formula>> formulas) => formulas.Values.SelectMany(x => x).OrderBy(f => f.name.Length).First().name;
+
+
 
     }
 }
