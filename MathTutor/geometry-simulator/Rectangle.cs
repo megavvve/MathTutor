@@ -141,7 +141,7 @@ namespace MathTutor
 
         public override string ToString()
         {
-            return $"A{A}, B({B.X}, {B.Y}), C({C.X}, {D.Y}), D({D.X}, {D.Y})";
+            return $"Прямоугольник: левая верхняя точка{A}, правая верхняя точка({B.X}, {B.Y}), правая нижняя точка({C.X}, {D.Y}), левая нижняя точка({D.X}, {D.Y})";
         }
 
     }

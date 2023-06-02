@@ -21,29 +21,49 @@ namespace MathTutor
             }
 
         }
-        Ellipse(Dot leftDot, Dot rightDot, Dot upDot, Dot downDot)
+        public Ellipse(Dot leftDot, Dot rightDot, Dot upDot, Dot downDot)
         {
+            if (leftDot == null || rightDot == null || upDot == null || downDot == null)
+            {
+                throw new ArgumentNullException("Одна или несколько точек эллипса не были инициализированы.");
+            }
             if (isEllipse(leftDot, rightDot, upDot, downDot))
             {
+
                 LeftDot = leftDot;
                 RightDot = rightDot;
                 UpDot = upDot;
                 DownDot = downDot;
 
             }
+            else
+            {
+                throw new Exception("Это не эллипc");
+            }
         }
         private bool isEllipse(Dot leftDot, Dot rightDot, Dot upDot, Dot downDot)
         {
-            double radiusX = Math.Sqrt(Math.Pow(leftDot.X - rightDot.X, 2) + Math.Pow(rightDot.Y - leftDot.Y, 2)) / 2;
-            double radiusY = Math.Sqrt(Math.Pow(downDot.X - upDot.X, 2) + Math.Pow(downDot.Y - upDot.Y, 2)) / 2;
-            Dot _center = new Dot((LeftDot.X + RightDot.X) / 2, (UpDot.Y + DownDot.Y) / 2);
 
-            if (radiusX > 0 && radiusY > 0 && _center.X > leftDot.X && _center.X < rightDot.X && _center.Y > upDot.Y && _center.Y < downDot.Y)
-            {
-                return true;
-            }
+            double centerX = (leftDot.X + rightDot.X) / 2;
+            double centerY = (upDot.Y + downDot.Y) / 2;
+            Dot center = new Dot(centerX, centerY);
 
-            return false;
+            double semiMajorAxis = Math.Abs(rightDot.X - leftDot.X) / 2;
+            double semiMinorAxis = Math.Abs(downDot.Y - upDot.Y) / 2;
+
+            bool isEllipse = true;
+            isEllipse &= DistanceTo(center, leftDot) <= semiMajorAxis;
+            isEllipse &= DistanceTo(center, rightDot) <= semiMajorAxis;
+            isEllipse &= DistanceTo(center, upDot) <= semiMinorAxis;
+            isEllipse &= DistanceTo(center, downDot) <= semiMinorAxis;
+
+            return isEllipse; 
+        }
+        private double DistanceTo(Dot point1, Dot point2)
+        {
+            double deltaX = point2.X - point1.X;
+            double deltaY = point2.Y - point1.Y;
+            return Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
         }
         public override double Square()
         {

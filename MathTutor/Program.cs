@@ -1,5 +1,6 @@
-﻿using System;
-using System.Security.Cryptography.X509Certificates;
+﻿using MathTutor;
+using System;
+
 
 namespace MathTutor
 {
@@ -7,13 +8,12 @@ namespace MathTutor
     {
         static void Main(string[] args)
         {
-            /*
-            Rectangle rectangle1 = new Rectangle(new Dot { X = -3, Y = 4 }, new Dot { X = 3, Y = 4 }, new Dot { X = 3, Y = 1 }, new Dot { X = -3, Y = 1 });
-            Rectangle rectangle2 = new Rectangle(new Dot { X = 7, Y = 3 }, new Dot { X = 10, Y = 3 }, new Dot { X = 10, Y = 1 }, new Dot { X = 7, Y = 1 });
-            */
-            Simulator simulator = new Simulator();
-            simulator.GeometrySimulator();
+
+            GeometrySimulator geometrySimulator = new GeometrySimulator();
+            geometrySimulator.GeometrySimulatorWork();
 
         }
     }
 }
+
+

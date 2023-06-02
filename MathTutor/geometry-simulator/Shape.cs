@@ -11,7 +11,7 @@ namespace MathTutor
         public abstract double Square();
         public abstract double Perimeter();
         public abstract void Rotate(double a);
-        public abstract void Move(double offsetX, double offsetY)
+        public abstract void Move(double offsetX, double offsetY);
 
         public abstract double GetDistanceFromCenter();
 
