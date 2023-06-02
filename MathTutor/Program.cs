@@ -18,7 +18,8 @@ namespace MathTutor
                 {
                     case "A":
                         {
-                           
+                           GeometrySimulator simulator = new GeometrySimulator();
+                            simulator.GeometrySimulatorWork();
                             break;
                         }
                     case "B":
