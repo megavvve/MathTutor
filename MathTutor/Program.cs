@@ -1,11 +1,10 @@
 ﻿using MathTutor;
-using MathTutor.KnowlendgeCheck;
+using MathTutor.MemorizingTheTheory;
 using System;
-
 
 namespace MathTutor
 {
-    internal class Program
+    public class Program
     {
         static void Main(string[] args)
         {
@@ -25,20 +24,30 @@ namespace MathTutor
                         }
                     case "B":
                         {
-                            GeneratingControlWork controlWork = new GeneratingControlWork();
-                            Console.WriteLine("Введите количество вариантов");
-                            int countControlWork = int.Parse(Console.ReadLine());
-                            Console.WriteLine("Введите количество заданий в варианте");
-                            int countTasks = int.Parse(Console.ReadLine());
-                            controlWork.GenerateFiles(controlWork.Generating(countTasks, countControlWork));
-                            Console.WriteLine("Проверьте папку bin, там сгенерировались варианты и подсказки к заданиям!");
+                            //GeneratingControlWork controlWork = new GeneratingControlWork();
+                            //Console.WriteLine("Введите количество вариантов");
+                            //int countControlWork = int.Parse(Console.ReadLine());
+                            //Console.WriteLine("Введите количество заданий в варианте");
+                            //int countTasks = int.Parse(Console.ReadLine());
+                            //controlWork.GenerateFiles(controlWork.Generating(countTasks, countControlWork));
+                            //Console.WriteLine("Проверьте папку bin, там сгенерировались варианты и подсказки к заданиям!");
                             break;
                         }
                     case "C":
                         {
                             //Не забудьте скопировать input-files в bin
-                            FormulaTrainer trainer = new FormulaTrainer();
-                            trainer.Training();
+                            Console.WriteLine("Выбирите, что Вы хотите видеть\n1 - формулы\n2 - теоремы");
+                            int input2 = int.Parse(Console.ReadLine());
+                            if(input2 == 1)
+                            {
+                                FormulaTrainer trainer = new FormulaTrainer();
+                                trainer.Training();
+                            }
+                            if(input2 == 2)
+                            {
+                                TheoremTrainer trainer = new TheoremTrainer();
+                                trainer.Train();
+                            }
                             break;
                         }
                     default:
