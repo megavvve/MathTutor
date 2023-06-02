@@ -11,7 +11,7 @@ namespace MathTutor
             //trainer.Training();
 
             TheoremTrainer theoremTrainer = new TheoremTrainer();
-            theoremTrainer.Training();
+            theoremTrainer.Train();
         
         }
     }

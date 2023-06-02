@@ -9,382 +9,204 @@ namespace MathTutor.MemorizingTheTheory
 {
     public class TheoremTrainer 
     {
-        private Dictionary<string, List<Theorem>> theoremes = new Dictionary<string, List<Theorem>>();
-        private Dictionary<string, List<Theorem>> wrongTheorem = new Dictionary<string, List<Theorem>>();
-        private Dictionary<string, List<Theorem>> correctTheorem = new Dictionary<string, List<Theorem>>();
+        private List<Theorem> theorems;
+        private List<string> formulas;
+        private Dictionary<string, int> incorrectAnswers;
 
-        public TheoremTrainer() { }
-        public void Training()
+        public TheoremTrainer()
         {
-            LoadTheoremes(@"./input-files/theorem.txt");
+            theorems = new List<Theorem>();
+            formulas = new List<string>();
+            incorrectAnswers = new Dictionary<string, int>();
+        }
 
-            StartForTrainig();
-            while (true)
+        public void LoadTheoremsFromFile(string filePath)
+        {
+            string[] lines = File.ReadAllLines(filePath);
+
+            foreach (string line in lines)
             {
-                List<string> topics = SelectTopics();
+                string[] parts = line.Split('|');
 
-                Dictionary<string, List<Theorem>> theoremesFromTopics = TheoremesFromTopics(topics);
-                if (theoremesFromTopics.Count == 0)
+                if (parts.Length == 4)
                 {
-                    Console.WriteLine("Проверь правильность введенный данных");
+                    Theorem theorem = new Theorem
+                    {
+                        Topic = parts[0],
+                        Condition = parts[1],
+                        Conclusion = parts[2],
+                        Proof = parts[3]
+                    };
+
+                    theorems.Add(theorem);
                 }
-
-
-                MainTrainFormula(theoremesFromTopics);
-
-                AddWrongAnswerInDB(@"input-files/db_Theorem.txt");
-                WorkOnMistakesTheorem();//работа над ошибками
-                Console.WriteLine("Напишите одну тему, которая вас интересует, чтобы вывести по ней статистику");
-                PrintThemes();//вывод тем
-                string userInputForStat = Console.ReadLine().Trim().ToLower();
-                Console.WriteLine("Введите какое количество последних тренировок, которое вас интересует для вывода статистика по теме");
-                int countForStat = Convert.ToInt32(Console.ReadLine());
-                PrintWrongAnswerStatistics(userInputForStat, countForStat, @"input-files/db_Theorem.txt");
-                Thread.Sleep(2000);
-                Console.WriteLine("Напишите Y,если хотите продолжить тренировку");
-                Console.WriteLine("Если хотите завершить, нажмите любую кнопку кроме Y");
-                string userInput = Console.ReadLine().Trim().ToUpper();
-                if (userInput == "Y")
+                else if (parts.Length == 1)
                 {
-                    Console.Clear();
-                    Console.WriteLine();
-                    Console.WriteLine("Напишите темы через запятую, которые вас интересуют");
-                    PrintThemes();
+                    formulas.Add(parts[0]);
                 }
-                else
-                {
-                    Console.WriteLine();
-                    Console.WriteLine("тренировка завершена!");
-                    break;
-                }
-
             }
         }
 
-        private void StartForTrainig()
+        public void AddFormula(string formula)
         {
-            Console.WriteLine("Привет! Это тренажер для заучивания формул/теорем");
-            Console.WriteLine("Напишите темы через запятую, которые вас интересуют");
-            PrintThemes();
-
+            formulas.Add(formula);
         }
 
-        public void WorkOnMistakesTheorem()
+        public void AddTheorem(string topic, string condition, string conclusion, string proof)
         {
-            Console.WriteLine();
-            if (wrongTheorem.Count() != 0)
+            Theorem theorem = new Theorem
             {
-                Console.WriteLine("А сейчас будет работа над ошибками");
-                Thread.Sleep(500);
-                Console.WriteLine("Загрузка...");
-                Thread.Sleep(2000);
-                Console.Clear();
-                Console.WriteLine("Работа над ошибками:");
+                Topic = topic,
+                Condition = condition,
+                Conclusion = conclusion,
+                Proof = proof
+            };
+
+            theorems.Add(theorem);
+        }
+
+        public void Train()
+        {
+            LoadTheoremsFromFile("./input-files/theorem.txt");
+            Console.WriteLine("Выберите тип тренировки:");
+            Console.WriteLine("2. Тренировка по теоремам");
+            int choice = int.Parse(Console.ReadLine());
+
+            switch (choice)
+            {
+                case 2:
+                    TrainTheorems();
+                    break;
+                default:
+                    Console.WriteLine("Неверный выбор.");
+                    break;
+            }
+        }
+
+        
+
+        private void TrainTheorems()
+        {
+            if (theorems.Count == 0)
+            {
+                Console.WriteLine("Нет доступных теорем для тренировки.");
+                return;
+            }
+
+            Console.WriteLine("Начало тренировки по теоремам.");
+            Console.WriteLine("Введите количество примеров для тренировки:");
+            int count = int.Parse(Console.ReadLine());
+
+            for (int i = 0; i < count; i++)
+            {
+                Theorem theorem = GetRandomTheorem();
+                Console.WriteLine($"Пример {i + 1}:");
+                Console.WriteLine("Введите условие теоремы:");
+                string condition = Console.ReadLine();
+
+                if (condition != theorem.Condition)
+                {
+                    Console.WriteLine("Неправильное условие.");
+                    AddIncorrectAnswer(theorem.Topic);
+                    continue;
+                }
+
+                Console.WriteLine("Введите заключение теоремы:");
+                string conclusion = Console.ReadLine();
+
+                if (conclusion != theorem.Conclusion)
+                {
+                    Console.WriteLine("Неправильное заключение.");
+                    AddIncorrectAnswer(theorem.Topic);
+                    continue;
+                }
+
+                Console.WriteLine("Введите доказательство теоремы:");
+                string proof = Console.ReadLine();
+
+                if (proof != theorem.Proof)
+                {
+                    Console.WriteLine("Неправильное доказательство.");
+                    AddIncorrectAnswer(theorem.Topic);
+                    continue;
+                }
+
+                Console.WriteLine("Правильный ответ!");
+            }
+
+            Console.WriteLine("Тренировка по теоремам завершена.");
+        }
+
+
+        private Theorem GetRandomTheorem()
+        {
+            return theorems[new Random().Next(0, theorems.Count)];
+        }
+
+        private void AddIncorrectAnswer(string topic)
+        {
+            if (incorrectAnswers.ContainsKey(topic))
+            {
+                incorrectAnswers[topic]++;
+            }
+            else
+            {
+                incorrectAnswers.Add(topic, 1);
+            }
+        }
+
+        public void PrintIncorrectAnswersStatistics(int numTrainings)
+        {
+            Console.WriteLine($"Статистика неправильных ответов за последние {numTrainings} тренировок:");
+
+            var sortedIncorrectAnswers = incorrectAnswers.OrderByDescending(x => x.Value);
+
+            foreach (var entry in sortedIncorrectAnswers)
+            {
+                if (entry.Value >= numTrainings)
+                {
+                    Console.WriteLine($"Тема: {entry.Key}, Количество неправильных ответов: {entry.Value}");
+                }
+            }
+        }
+
+        public void PrintShortestFormula()
+        {
+            if (formulas.Count == 0)
+            {
+                Console.WriteLine("Нет доступных формул.");
+                return;
+            }
+
+            string shortestFormula = formulas.OrderBy(x => x.Length).First();
+            Console.WriteLine($"Формула с наименьшей записью: {shortestFormula}");
+        }
+
+        public void PrintLongestProof()
+        {
+            if (theorems.Count == 0)
+            {
+                Console.WriteLine("Нет доступных теорем.");
+                return;
+            }
+
+            Theorem longestProofTheorem = theorems.OrderByDescending(x => x.Proof.Length).First();
+            Console.WriteLine($"Теорема с самым длинным доказательством: {longestProofTheorem.Topic}");
+            Console.WriteLine($"Доказательство: {longestProofTheorem.Proof}");
+        }
+
+        public void PrintAllTheorems()
+        {
+            foreach (Theorem theorem in theorems)
+            {
+                Console.WriteLine($"Тема: {theorem.Topic}");
+                Console.WriteLine($"Условие: {theorem.Condition}");
+                Console.WriteLine($"Заключение: {theorem.Conclusion}");
+                Console.WriteLine($"Доказательство: {theorem.Proof}");
                 Console.WriteLine();
             }
-            while (wrongTheorem.Count() != 0)
-            {
-
-                foreach (var theoremListWithTopic in wrongTheorem)
-                {
-
-                    List<Theorem> theoremList = theoremListWithTopic.Value.ToList();
-                    foreach (Theorem theorem in theoremList)
-                    {
-                        PrintTheoremForWorkOnMistakes(theoremListWithTopic.Key, theorem);
-                    }
-
-                }
-            }
-            if (wrongTheorem.Count() == 0)
-            {
-                Thread.Sleep(2000);
-                Console.Clear();
-                Console.WriteLine();
-                Console.WriteLine("Работа над ошибками закончена!");
-
-            }
-        }
-        public void PrintTheoremForWorkOnMistakes(string theme, Theorem theorem)
-        {
-            Console.WriteLine("------------------------------");
-            Console.WriteLine("тема: " + theme);
-            Console.WriteLine("Теорема: " + theorem.condition);
-            Console.WriteLine("Нажми на любую кнопку, чтоб увидеть правильный ответ");
-
-            Console.ReadKey();
-            Console.WriteLine();
-            Console.WriteLine("Правильный ответ: " + theorem.proof);
-            Console.WriteLine("Правильно ли ты ответил? (Y/N)");
-            while (true)
-            {
-
-                string userInput = Console.ReadLine().Trim().ToUpper();
-
-                if (userInput.ToUpper() == "Y" || userInput.ToUpper() == "N")
-                {
-                    if (userInput == "Y")
-                    {
-                        wrongTheorem[theme].Remove(theorem);
-                        if (wrongTheorem[theme].Count == 0)
-                        {
-                            wrongTheorem.Remove(theme);
-                        }
-                    }
-                    break;
-                }
-
-                Console.WriteLine("Некорректный ввод! Пожалуйста, введите Y или N.");
-                Console.WriteLine("Введите Y или N:");
-            }
-
-        }
-
-
-        public void PrintTheoremForTraining(string theme, Theorem theorem)
-        {
-            Console.WriteLine("------------------------------");
-            Console.WriteLine("тема: " + theme);
-            Console.WriteLine("Теорема " + theorem.condition);
-            Console.WriteLine("Нажми на любую кнопку, чтоб увидеть правильный ответ");
-
-            Console.ReadKey();
-            Console.WriteLine();
-            Console.WriteLine("Правильное заключение: " + theorem.conclusion);
-
-            Console.ReadKey();
-            Console.WriteLine();
-            Console.WriteLine("Правильная теорема: " + theorem.proof);
-            Console.WriteLine("Правильно ли ты ответил? (Y/N)");
-            while (true)
-            {
-
-                string userInput1 = Console.ReadLine().Trim().ToUpper();
-
-                if (userInput1.ToUpper() == "Y" || userInput1.ToUpper() == "N")
-                {
-
-                    if (userInput1 == "Y")
-                    {
-
-                        UpdateCorrectAnswerStats(theme, theorem);
-                    }
-                    if (userInput1 == "N")
-                    {
-
-                        UpdateIncorrectAnswerStats(theme, theorem);
-                    }
-
-
-                    break;
-                }
-
-                Console.WriteLine("Некорректный ввод! Пожалуйста, введите Y или N.");
-                Console.WriteLine("Введите Y или N:");
-            }
-        }
-
-        public void MainTrainFormula(Dictionary<string, List<Theorem>> theoremsFromTopics)
-        {
-
-            foreach (var formula in theoremsFromTopics)
-            {
-                foreach (var item in formula.Value)
-                {
-                    PrintTheoremForTraining(formula.Key, item);
-                }
-            }
-
-        }
-
-        public Dictionary<string, List<Theorem>> TheoremesFromTopics(List<string> topics)
-        {
-
-            Dictionary<string, List<Theorem>> theoremesFromTopics = new Dictionary<string, List<Theorem>>();
-            foreach (var item in theoremes)
-            {
-                foreach (var item2 in topics)
-                {
-                    if (item.Key == item2)
-                    {
-                        foreach (var item3 in item.Value)
-                        {
-                            if (theoremesFromTopics.ContainsKey(item2))
-                            {
-                                theoremesFromTopics[item2].Add(item3);
-                            }
-                            else
-                            {
-                                theoremesFromTopics.Add(item2, new List<Theorem> { { item3 } });
-                            }
-
-                        }
-
-                    }
-                }
-
-            }
-            return theoremesFromTopics;
-        }
-        public List<string> SelectTopics()
-        {
-            List<string> topics = new List<string>();
-            string userInput = Console.ReadLine().Trim().ToLower();
-            string[] topicsFromInput = userInput.Split('|');
-
-            foreach (string topic in topicsFromInput)
-            {
-                if (theoremes.ContainsKey(topic))
-                {
-
-                    topics.Add(topic);
-                }
-            }
-
-            return topics;
-
-        }
-        public void UpdateIncorrectAnswerStats(string theme, Theorem theorem)
-        {
-
-            if (wrongTheorem.ContainsKey(theme))
-            {
-                wrongTheorem[theme].Add(theorem);
-            }
-            else
-            {
-                wrongTheorem.Add(theme, new List<Theorem> { theorem });
-            }
-        }
-        public void UpdateCorrectAnswerStats(string theme, Theorem theorem)
-        {
-
-            if (correctTheorem.ContainsKey(theme))
-            {
-                correctTheorem[theme].Add(theorem);
-
-            }
-            else
-            {
-                correctTheorem.Add(theme, new List<Theorem> { theorem });
-            }
-        }
-        public void LoadTheoremes(string path)
-        {
-
-            using (StreamReader sr = File.OpenText(path))
-            {
-                string line = sr.ReadLine().Trim();
-
-                while (line != null)
-                {
-
-
-                    if (line != null)
-                    {
-                        string[] theoremWithTheme = line.Split("|");
-                        Theorem theorem = new Theorem(theoremWithTheme[1], theoremWithTheme[2], theoremWithTheme[3]);
-
-                        theoremes.Add(theoremWithTheme[0], new List<Theorem> { theorem });
-                    }
-                    line = sr.ReadLine();
-
-                }
-            }
-
-        }
-        public void AddWrongAnswerInDB(string path)
-        {
-            int lastTrain = 0;
-            if (new FileInfo(path).Length == 0)
-            {
-                lastTrain = 0;
-            }
-            else
-            {
-                lastTrain = int.Parse(File.ReadAllLines(path).Last().Split('|')[0]);
-            }
-
-            using (var fs = new FileStream(path, FileMode.Append))
-            using (var sw = new StreamWriter(fs))
-            {
-                foreach (var item in wrongTheorem.Keys)
-                {
-                    string str = $"{lastTrain + 1},{item},{wrongTheorem[item].Count}";
-                    sw.WriteLine(str);
-                }
-            }
-
-
-        }
-        public void PrintThemes()
-        {
-            int c = 1;
-            Console.WriteLine();
-
-            foreach (var item in theoremes.Keys)
-            {
-                Console.WriteLine($"{c}.{item}");
-                c++;
-            }
-            Console.WriteLine();
-        }
-
-        public void PrintWrongAnswerStatistics(string topic, int numTrainings, string path)
-        {
-
-            List<string> data_base = File.ReadAllLines(path).ToList();
-            List<string> take_last_from_DB = data_base.Where(x => x.Split('|')[1] == topic).TakeLast(numTrainings).ToList();
-            Dictionary<string, Dictionary<string, int>> dict_from_DB = new Dictionary<string, Dictionary<string, int>>();
-            foreach (var string_from_DB in take_last_from_DB)
-            {
-                if (string_from_DB != null)
-                {
-                    string numTrain = string_from_DB.Split(',')[0];
-                    string theme = string_from_DB.Split(',')[1];
-                    int countWrongAnswers = int.Parse(string_from_DB.Split('|')[2]);
-                    if (dict_from_DB.ContainsKey(numTrain))
-                    {
-                        if (dict_from_DB[numTrain].ContainsKey(theme))
-                        {
-                            dict_from_DB[numTrain].Remove(theme);
-                            dict_from_DB[numTrain].Add(theme, countWrongAnswers);
-                        }
-                        else
-                        {
-                            dict_from_DB[numTrain].Add(theme, countWrongAnswers);
-                        }
-                    }
-                    else
-                    {
-
-                        dict_from_DB.Add(numTrain, new Dictionary<string, int>() { { theme, countWrongAnswers } });
-
-                    }
-
-                }
-
-            }
-            Console.WriteLine($"Статистика неправильных ответов по теме '{topic}' (основанная на {numTrainings} тренировках):");
-            Console.WriteLine();
-            Console.WriteLine($"Номер тренировки\t\tКоличество неправильных ответов");
-            foreach (var numTrain in dict_from_DB.Keys)
-            {
-                var themeWithCount = dict_from_DB[numTrain];
-                foreach (var themeInDict in themeWithCount.Keys)
-                {
-                    if (themeInDict == topic)
-                    {
-
-                        int wrongCount = themeWithCount[themeInDict];
-                        Console.WriteLine($"Тренировка {numTrain}\t\t{wrongCount}");
-                    }
-                }
-
-            }
-            Console.WriteLine();
-            Console.WriteLine();
-
         }
     }
+
+
 }

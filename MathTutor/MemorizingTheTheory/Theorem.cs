@@ -8,15 +8,9 @@ namespace MathTutor
 {
     public class Theorem
     {
-        public string condition;
-        public string conclusion;
-        public string proof;
-
-        public Theorem(string Condition, string Conclusion, string Proof) 
-        { 
-            condition = Condition;
-            conclusion = Conclusion;
-            proof = Proof;
-        }   
+        public string Topic { get; set; }
+        public string Condition { get; set; }
+        public string Conclusion { get; set; }
+        public string Proof { get; set; }
     }
 }
