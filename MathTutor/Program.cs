@@ -1,6 +1,6 @@
-﻿using MathTutor.KnowlendgeCheck;
-using MathTutor.part_A;
+﻿using MathTutor;
 using System;
+
 
 namespace MathTutor
 {
@@ -18,7 +18,7 @@ namespace MathTutor
                 {
                     case "A":
                         {
-                            var simulator = new Simulator();
+                           
                             break;
                         }
                     case "B":
@@ -51,3 +51,5 @@ namespace MathTutor
         }
     }
 }
+
+

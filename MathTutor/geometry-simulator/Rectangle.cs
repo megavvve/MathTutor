@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MathTutor.part_A
+namespace MathTutor
 {
-    internal class Rectangle
+    class Rectangle : Shape
     {
-        private Dot a { get; set; }
+        private Dot a;
         public Dot A
         {
             get { return a; }
@@ -22,7 +21,7 @@ namespace MathTutor.part_A
             }
         }
 
-        private Dot b { get; set; }
+        private Dot b;
         public Dot B
         {
             get { return b; }
@@ -36,7 +35,7 @@ namespace MathTutor.part_A
         }
 
 
-        private Dot c { get; set; }
+        private Dot c;
         public Dot C
         {
             get { return c; }
@@ -49,7 +48,7 @@ namespace MathTutor.part_A
             }
         }
 
-        private Dot d { get; set; }
+        private Dot d;
         public Dot D
         {
             get { return d; }
@@ -88,14 +87,14 @@ namespace MathTutor.part_A
         }
 
 
-        public double Square()
+        public override double Square()
         {
             var AB = Math.Sqrt((A.X - B.X) * (A.X - B.X) + (A.Y - B.Y) * (A.Y - B.Y));
             var BC = Math.Sqrt((C.X - B.X) * (C.X - B.X) + (C.Y - B.Y) * (C.Y - B.Y));
-            return 2*(AB + BC);
+            return 2 * (AB + BC);
         }
 
-        public double Perimeter()
+        public override double Perimeter()
         {
             var AB = Math.Sqrt((A.X - B.X) * (A.X - B.X) + (A.Y - B.Y) * (A.Y - B.Y));
             var BC = Math.Sqrt((C.X - B.X) * (C.X - B.X) + (C.Y - B.Y) * (C.Y - B.Y));
@@ -104,12 +103,46 @@ namespace MathTutor.part_A
 
         public List<Dot> GetVertices()
         {
-            return new List<Dot>() { A, B , C, D };
+            return new List<Dot>() { A, B, C, D };
+        }
+        public override double GetDistanceFromCenter()
+        {
+
+            double distance = Math.Sqrt(Math.Pow(Center.X, 2) + Math.Pow(Center.Y, 2));
+
+            return distance;
+        }
+        public override void Rotate(double a)
+        {
+            foreach (var vertices in GetVertices())
+            {
+                var x = vertices.X - Center.X;
+                var y = vertices.Y - Center.Y;
+                var p = Math.Sqrt(x * x + y * y);
+                var newx = Math.Cos(Math.Acos(x / p) + a) * p;
+                vertices.X = newx + Center.X;
+                vertices.Y = Math.Sqrt(p * p - newx * newx) + Center.Y;
+            }
+        }
+        public override void Move(double offsetX, double offsetY)
+        {
+            A.X += offsetX;
+            A.Y += offsetY;
+
+            B.X += offsetX;
+            B.Y += offsetY;
+
+            C.X += offsetX;
+            C.Y += offsetY;
+
+            D.X += offsetX;
+            D.Y += offsetY;
         }
 
         public override string ToString()
         {
-            return $"A{A}, B({B.X}, {B.Y}), C({C.X}, {D.Y}), D({D.X}, {D.Y})"; 
+            return $"Прямоугольник: левая верхняя точка{A}, правая верхняя точка({B.X}, {B.Y}), правая нижняя точка({C.X}, {D.Y}), левая нижняя точка({D.X}, {D.Y})";
         }
+
     }
 }
