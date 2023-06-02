@@ -14,6 +14,9 @@
     <None Update="input-files\formulas.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="input-files\theorem.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="MemorizingTheTheory\input-files\formulas.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -1,48 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace MathTutor
+namespace MathTutor.MemorizingTheTheory
 {
-    public class FormulaTrainer
+    public class TheoremTrainer 
     {
+        private Dictionary<string, List<Theorem>> theoremes = new Dictionary<string, List<Theorem>>();
+        private Dictionary<string, List<Theorem>> wrongTheorem = new Dictionary<string, List<Theorem>>();
+        private Dictionary<string, List<Theorem>> correctTheorem = new Dictionary<string, List<Theorem>>();
 
-        private Dictionary<string, List<Formula>> formulas = new Dictionary<string, List<Formula>>();
-        private Dictionary<string, List<Formula>> wrongAnswers = new Dictionary<string, List<Formula>>();
-        private Dictionary<string, List<Formula>> correctAnswers = new Dictionary<string, List<Formula>>();
-
-        
-        public FormulaTrainer() { }
+        public TheoremTrainer() { }
         public void Training()
         {
-            LoadFormulas(@"./input-files/formulas.txt");
+            LoadTheoremes(@"./input-files/theorem.txt");
 
             StartForTrainig();
             while (true)
             {
                 List<string> topics = SelectTopics();
 
-                Dictionary<string, List<Formula>> formulasFromTopics = FormulasFromTopics(topics);
-                if (formulasFromTopics.Count == 0)
+                Dictionary<string, List<Theorem>> theoremesFromTopics = TheoremesFromTopics(topics);
+                if (theoremesFromTopics.Count == 0)
                 {
                     Console.WriteLine("Проверь правильность введенный данных");
                 }
 
 
-                MainTrainFormula(formulasFromTopics);
+                MainTrainFormula(theoremesFromTopics);
 
-                AddWrongAnswerInDB(@"input-files/data_base_for_statistic.txt");
-                WorkOnMistakes();//работа над ошибками
+                AddWrongAnswerInDB(@"input-files/db_Theorem.txt");
+                WorkOnMistakesTheorem();//работа над ошибками
                 Console.WriteLine("Напишите одну тему, которая вас интересует, чтобы вывести по ней статистику");
                 PrintThemes();//вывод тем
                 string userInputForStat = Console.ReadLine().Trim().ToLower();
                 Console.WriteLine("Введите какое количество последних тренировок, которое вас интересует для вывода статистика по теме");
                 int countForStat = Convert.ToInt32(Console.ReadLine());
-                PrintWrongAnswerStatistics(userInputForStat, countForStat, @"input-files/data_base_for_statistic.txt");
+                PrintWrongAnswerStatistics(userInputForStat, countForStat, @"input-files/db_Theorem.txt");
                 Thread.Sleep(2000);
                 Console.WriteLine("Напишите Y,если хотите продолжить тренировку");
                 Console.WriteLine("Если хотите завершить, нажмите любую кнопку кроме Y");
@@ -63,6 +60,7 @@ namespace MathTutor
 
             }
         }
+
         private void StartForTrainig()
         {
             Console.WriteLine("Привет! Это тренажер для заучивания формул/теорем");
@@ -70,10 +68,11 @@ namespace MathTutor
             PrintThemes();
 
         }
-        public void WorkOnMistakes()
+
+        public void WorkOnMistakesTheorem()
         {
             Console.WriteLine();
-            if (wrongAnswers.Count() != 0)
+            if (wrongTheorem.Count() != 0)
             {
                 Console.WriteLine("А сейчас будет работа над ошибками");
                 Thread.Sleep(500);
@@ -83,21 +82,21 @@ namespace MathTutor
                 Console.WriteLine("Работа над ошибками:");
                 Console.WriteLine();
             }
-            while (wrongAnswers.Count() != 0)
+            while (wrongTheorem.Count() != 0)
             {
 
-                foreach (var formulaListWithTopic in wrongAnswers)
+                foreach (var theoremListWithTopic in wrongTheorem)
                 {
 
-                    List<Formula> formulaList = formulaListWithTopic.Value.ToList();
-                    foreach (Formula formula in formulaList)
+                    List<Theorem> theoremList = theoremListWithTopic.Value.ToList();
+                    foreach (Theorem theorem in theoremList)
                     {
-                        PrintFormulaForWorkOnMistakes(formulaListWithTopic.Key, formula);
+                        PrintTheoremForWorkOnMistakes(theoremListWithTopic.Key, theorem);
                     }
 
                 }
             }
-            if (wrongAnswers.Count() == 0)
+            if (wrongTheorem.Count() == 0)
             {
                 Thread.Sleep(2000);
                 Console.Clear();
@@ -106,19 +105,16 @@ namespace MathTutor
 
             }
         }
-
-        
-
-        public void PrintFormulaForWorkOnMistakes(string theme, Formula formula)
+        public void PrintTheoremForWorkOnMistakes(string theme, Theorem theorem)
         {
             Console.WriteLine("------------------------------");
             Console.WriteLine("тема: " + theme);
-            Console.WriteLine("Название формулы: " + formula.name);
+            Console.WriteLine("Теорема: " + theorem.condition);
             Console.WriteLine("Нажми на любую кнопку, чтоб увидеть правильный ответ");
 
             Console.ReadKey();
             Console.WriteLine();
-            Console.WriteLine("Правильный ответ: " + formula.correct_answer);
+            Console.WriteLine("Правильный ответ: " + theorem.proof);
             Console.WriteLine("Правильно ли ты ответил? (Y/N)");
             while (true)
             {
@@ -129,10 +125,10 @@ namespace MathTutor
                 {
                     if (userInput == "Y")
                     {
-                        wrongAnswers[theme].Remove(formula);
-                        if (wrongAnswers[theme].Count == 0)
+                        wrongTheorem[theme].Remove(theorem);
+                        if (wrongTheorem[theme].Count == 0)
                         {
-                            wrongAnswers.Remove(theme);
+                            wrongTheorem.Remove(theme);
                         }
                     }
                     break;
@@ -144,18 +140,21 @@ namespace MathTutor
 
         }
 
-        
 
-        public void PrintFormulaForTraining(string theme, Formula formula)
+        public void PrintTheoremForTraining(string theme, Theorem theorem)
         {
             Console.WriteLine("------------------------------");
             Console.WriteLine("тема: " + theme);
-            Console.WriteLine("Название формулы: " + formula.name);
+            Console.WriteLine("Теорема " + theorem.condition);
             Console.WriteLine("Нажми на любую кнопку, чтоб увидеть правильный ответ");
 
             Console.ReadKey();
             Console.WriteLine();
-            Console.WriteLine("Правильный ответ: " + formula.correct_answer);
+            Console.WriteLine("Правильное заключение: " + theorem.conclusion);
+
+            Console.ReadKey();
+            Console.WriteLine();
+            Console.WriteLine("Правильная теорема: " + theorem.proof);
             Console.WriteLine("Правильно ли ты ответил? (Y/N)");
             while (true)
             {
@@ -168,12 +167,12 @@ namespace MathTutor
                     if (userInput1 == "Y")
                     {
 
-                        UpdateCorrectAnswerStats(theme, formula);
+                        UpdateCorrectAnswerStats(theme, theorem);
                     }
                     if (userInput1 == "N")
                     {
 
-                        UpdateIncorrectAnswerStats(theme, formula);
+                        UpdateIncorrectAnswerStats(theme, theorem);
                     }
 
 
@@ -184,26 +183,25 @@ namespace MathTutor
                 Console.WriteLine("Введите Y или N:");
             }
         }
-        public void MainTrainFormula(Dictionary<string, List<Formula>> formulasFromTopics)
+
+        public void MainTrainFormula(Dictionary<string, List<Theorem>> theoremsFromTopics)
         {
 
-            foreach (var formula in formulasFromTopics)
+            foreach (var formula in theoremsFromTopics)
             {
                 foreach (var item in formula.Value)
                 {
-                    PrintFormulaForTraining(formula.Key, item);
+                    PrintTheoremForTraining(formula.Key, item);
                 }
-
-
             }
 
         }
 
-        public Dictionary<string, List<Formula>> FormulasFromTopics(List<string> topics)
+        public Dictionary<string, List<Theorem>> TheoremesFromTopics(List<string> topics)
         {
 
-            Dictionary<string, List<Formula>> formulasFromTopics = new Dictionary<string, List<Formula>>();
-            foreach (var item in formulas)
+            Dictionary<string, List<Theorem>> theoremesFromTopics = new Dictionary<string, List<Theorem>>();
+            foreach (var item in theoremes)
             {
                 foreach (var item2 in topics)
                 {
@@ -211,13 +209,13 @@ namespace MathTutor
                     {
                         foreach (var item3 in item.Value)
                         {
-                            if (formulasFromTopics.ContainsKey(item2))
+                            if (theoremesFromTopics.ContainsKey(item2))
                             {
-                                formulasFromTopics[item2].Add(item3);
+                                theoremesFromTopics[item2].Add(item3);
                             }
                             else
                             {
-                                formulasFromTopics.Add(item2, new List<Formula> { { item3 } });
+                                theoremesFromTopics.Add(item2, new List<Theorem> { { item3 } });
                             }
 
                         }
@@ -226,17 +224,17 @@ namespace MathTutor
                 }
 
             }
-            return formulasFromTopics;
+            return theoremesFromTopics;
         }
         public List<string> SelectTopics()
         {
             List<string> topics = new List<string>();
             string userInput = Console.ReadLine().Trim().ToLower();
-            string[] topicsFromInput = userInput.Split(',');
+            string[] topicsFromInput = userInput.Split('|');
 
             foreach (string topic in topicsFromInput)
             {
-                if (formulas.ContainsKey(topic))
+                if (theoremes.ContainsKey(topic))
                 {
 
                     topics.Add(topic);
@@ -246,32 +244,32 @@ namespace MathTutor
             return topics;
 
         }
-        public void UpdateIncorrectAnswerStats(string theme, Formula formula)
+        public void UpdateIncorrectAnswerStats(string theme, Theorem theorem)
         {
 
-            if (wrongAnswers.ContainsKey(theme))
+            if (wrongTheorem.ContainsKey(theme))
             {
-                wrongAnswers[theme].Add(formula);
+                wrongTheorem[theme].Add(theorem);
             }
             else
             {
-                wrongAnswers.Add(theme, new List<Formula> { formula });
+                wrongTheorem.Add(theme, new List<Theorem> { theorem });
             }
         }
-        public void UpdateCorrectAnswerStats(string theme, Formula formula)
+        public void UpdateCorrectAnswerStats(string theme, Theorem theorem)
         {
 
-            if (correctAnswers.ContainsKey(theme))
+            if (correctTheorem.ContainsKey(theme))
             {
-                correctAnswers[theme].Add(formula);
+                correctTheorem[theme].Add(theorem);
 
             }
             else
             {
-                correctAnswers.Add(theme, new List<Formula> { formula });
+                correctTheorem.Add(theme, new List<Theorem> { theorem });
             }
         }
-        public void LoadFormulas(string path)
+        public void LoadTheoremes(string path)
         {
 
             using (StreamReader sr = File.OpenText(path))
@@ -284,18 +282,10 @@ namespace MathTutor
 
                     if (line != null)
                     {
-                        string[] formulaWithTheme = Regex.Split(line, ",");
-                        string theme = formulaWithTheme[0].ToLower();
-                        Formula formula = new Formula(formulaWithTheme[1], formulaWithTheme[2]);
+                        string[] theoremWithTheme = line.Split("|");
+                        Theorem theorem = new Theorem(theoremWithTheme[1], theoremWithTheme[2], theoremWithTheme[3]);
 
-                        if (formulas.ContainsKey(theme))
-                        {
-                            formulas[theme].Add(formula);
-                        }
-                        else
-                        {
-                            formulas.Add(theme, new List<Formula> { formula });
-                        }
+                        theoremes.Add(theoremWithTheme[0], new List<Theorem> { theorem });
                     }
                     line = sr.ReadLine();
 
@@ -312,15 +302,15 @@ namespace MathTutor
             }
             else
             {
-                lastTrain = int.Parse(File.ReadAllLines(path).Last().Split(',')[0]);
+                lastTrain = int.Parse(File.ReadAllLines(path).Last().Split('|')[0]);
             }
 
             using (var fs = new FileStream(path, FileMode.Append))
             using (var sw = new StreamWriter(fs))
             {
-                foreach (var item in wrongAnswers.Keys)
+                foreach (var item in wrongTheorem.Keys)
                 {
-                    string str = $"{lastTrain + 1},{item},{wrongAnswers[item].Count}";
+                    string str = $"{lastTrain + 1},{item},{wrongTheorem[item].Count}";
                     sw.WriteLine(str);
                 }
             }
@@ -332,18 +322,19 @@ namespace MathTutor
             int c = 1;
             Console.WriteLine();
 
-            foreach (var item in formulas.Keys)
+            foreach (var item in theoremes.Keys)
             {
                 Console.WriteLine($"{c}.{item}");
                 c++;
             }
             Console.WriteLine();
         }
+
         public void PrintWrongAnswerStatistics(string topic, int numTrainings, string path)
         {
 
             List<string> data_base = File.ReadAllLines(path).ToList();
-            List<string> take_last_from_DB = data_base.Where(x => x.Split(',')[1] == topic).TakeLast(numTrainings).ToList();
+            List<string> take_last_from_DB = data_base.Where(x => x.Split('|')[1] == topic).TakeLast(numTrainings).ToList();
             Dictionary<string, Dictionary<string, int>> dict_from_DB = new Dictionary<string, Dictionary<string, int>>();
             foreach (var string_from_DB in take_last_from_DB)
             {
@@ -351,7 +342,7 @@ namespace MathTutor
                 {
                     string numTrain = string_from_DB.Split(',')[0];
                     string theme = string_from_DB.Split(',')[1];
-                    int countWrongAnswers = int.Parse(string_from_DB.Split(',')[2]);
+                    int countWrongAnswers = int.Parse(string_from_DB.Split('|')[2]);
                     if (dict_from_DB.ContainsKey(numTrain))
                     {
                         if (dict_from_DB[numTrain].ContainsKey(theme))
@@ -395,11 +386,5 @@ namespace MathTutor
             Console.WriteLine();
 
         }
-
-
-        public string TheShortestTheory(Dictionary<string, List<Formula>> formulas) => formulas.Values.SelectMany(x => x).OrderBy(f => f.name.Length).First().name;
-
-
-
     }
 }

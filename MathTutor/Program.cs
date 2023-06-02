@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathTutor.MemorizingTheTheory;
+using System;
 
 namespace MathTutor 
 {
@@ -7,7 +8,10 @@ namespace MathTutor
         static void Main(string[] args)
         {
             FormulaTrainer trainer = new FormulaTrainer();
-            trainer.Training();
+            //trainer.Training();
+
+            TheoremTrainer theoremTrainer = new TheoremTrainer();
+            theoremTrainer.Training();
         
         }
     }
